@@ -262,6 +262,25 @@
     });
   }
 
+  // Download file
+  function downloadFile(index) {
+    const storedFiles = JSON.parse(localStorage.getItem("vaultFiles") || "[]");
+    const file = storedFiles[index];
+
+    const a = document.createElement('a');
+    a.href = file.data;
+    a.download = file.name;
+    a.click();
+  }
+
+  // Delete file
+  function deleteFile(index) {
+    const storedFiles = JSON.parse(localStorage.getItem("vaultFiles") || "[]");
+    storedFiles.splice(index, 1);
+    localStorage.setItem("vaultFiles", JSON.stringify(storedFiles));
+    renderFileList();
+  }
+
   // Save password
   function savePassword() {
     const newPassword = document.getElementById('newPassword').value;
