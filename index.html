@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VaultGuard - Secure File Portal</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #00ff99;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      color: #00ff99;
+      border-bottom: 1px solid #00ff99;
+      padding-bottom: 8px;
+    }
+
+    .section {
+      margin: 40px 0;
+      padding: 25px;
+      background: rgba(0, 255, 100, 0.05);
+      border: 1px solid #00ff99;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #00ff99;
+    }
+
+    label, input, button {
+      display: block;
+      margin: 10px 0;
+    }
+
+    input[type="password"],
+    input[type="file"],
+    input[type="text"] {
+      background-color: #011;
+      border: 1px solid #00ff99;
+      color: #00ff99;
+      padding: 10px;
+      border-radius: 5px;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #00ff99;
+      color: black;
+      font-weight: bold;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #00cc66;
+      transform: scale(1.05);
+    }
+
+    .file-list {
+      margin-top: 15px;
+    }
+
+    .file-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 10px 0;
+      border-bottom: 1px dotted #00ff99;
+    }
+
+    .file-entry button {
+      background-color: #003300;
+      border: 1px solid #00ff99;
+      color: #00ff99;
+      padding: 8px 16px;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+
+    .file-entry button:hover {
+      background-color: #004d00;
+    }
+
+    .hacker-words {
+      background: #011;
+      padding: 10px;
+      white-space: pre-line;
+      height: 100px;
+      overflow-y: auto;
+      border: 1px dashed #00ff99;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .footer {
+      text-align: center;
+      margin: 40px 0 20px;
+      font-size: 14px;
+      opacity: 0.6;
+    }
+
+    .preview {
+      max-height: 100px;
+      overflow: auto;
+      border: 1px dashed #00ff99;
+      padding: 5px;
+      margin-top: 5px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .loading {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Sign In Section -->
+  <div class="section" id="signin-section">
+    <h1>🚪 Secure Access Portal</h1>
+    <label for="password">Enter Access Password:</label>
+    <input type="password" id="password" placeholder="••••••••••••••••">
+    <div class="checkbox">
+      <input type="checkbox" id="rememberMe">
+      <label for="rememberMe">Remember me</label>
+    </div>
+    <button onclick="signIn()">Access Vault</button>
+    <div class="loading hidden" id="loading">Verifying credentials...</div>
+  </div>
+
+  <!-- File Upload Section -->
+  <div class="section hidden" id="upload-section">
+    <h2>📤 Upload Your Files Securely</h2>
+    <input type="file" id="fileInput" multiple>
+    <button onclick="uploadFiles()">Upload Files</button>
+  </div>
+
+  <!-- Uploaded Files Section -->
+  <div class="section hidden" id="files-section">
+    <h2>📁 Your Uploaded Files</h2>
+    <div class="file-list" id="file-list"></div>
+  </div>
+
+  <!-- Live Hacker Feed -->
+  <div class="section hidden" id="live-section">
+    <h2>🧠 Live System Feed</h2>
+    <div class="hacker-words" id="hacker-feed">> Initiating secure uplink...</div>
+  </div>
+
+  <!-- Monitor Section -->
+  <div class="section hidden" id="monitor-section">
+    <h2>🛰️ Network Monitor</h2>
+    <p>Status: <strong style="color: #00ffcc;">All systems operational.</strong></p>
+    <p>Last Sync: <span id="pingTime">00:00:00</span></p>
+  </div>
+
+  <!-- Password Vault Section -->
+  <div class="section hidden" id="password-vault-section">
+    <h2>🛡️ Password Vault</h2>
+    <label for="vault-label">Label (e.g., Gmail):</label>
+    <input type="text" id="vault-label" placeholder="Enter account label">
+    
+    <label for="vault-password">Password:</label>
+    <input type="text" id="vault-password" placeholder="Enter password">
+
+    <button onclick="saveVaultPassword()">Save Password</button>
+    <button onclick="clearVaultPasswords()">🧹 Clear All</button>
+
+    <div id="password-list" class="file-list"></div>
+  </div>
+
+  <div class="footer">
+    &copy; 2025 VaultGuard Systems | Stay Hidden, Stay Safe | Proudly made by Eng. Kallypsoh Synex
+  </div>
+
+</div>
+
+<script>
+  const correctPassword = "caleb123";
+  const feedLines = [
+    "> Transmitting encrypted payload...",
+    "> Accessing server nodes...",
+    "> Verifying digital signatures...",
+    "> Synchronizing with remote vault...",
+    "> Tracing route to secure endpoint...",
+    "> Updating security protocols...",
+    "> Generating session keys...",
+    "> Connection stabilized..."
+  ];
+
+  function signIn() {
+    const password = document.getElementById('password').value;
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const loading = document.getElementById('loading');
+
+    if (password === correctPassword) {
+      loading.classList.remove("hidden");
+      setTimeout(() => {
+        loading.classList.add("hidden");
+        document.getElementById('signin-section').classList.add('hidden');
+        ['upload-section', 'files-section', 'live-section', 'monitor-section', 'password-vault-section'].forEach(id =>
+          document.getElementById(id).classList.remove('hidden')
+        );
+        if (rememberMe) localStorage.setItem("vaultAccess", "granted");
+        loadFiles();
+        renderPasswordVault();
+        startLiveFeed();
+      }, 1000);
+    } else {
+      alert("Access Denied: Invalid Password.");
+    }
+  }
+
+  function uploadFiles() {
+    const fileInput = document.getElementById('fileInput');
+    const files = fileInput.files;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        const storedFiles = JSON.parse(localStorage.getItem("vaultFiles") || "[]");
+        storedFiles.push({
+          name: file.name,
+          type: file.type,
+          data: e.target.result
+        });
+        localStorage.setItem("vaultFiles", JSON.stringify(storedFiles));
+        renderFileList();
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    fileInput.value = "";
+  }
+
+  function renderFileList() {
+    const fileList = document.getElementById('file-list');
+    fileList.innerHTML = '';
+    const storedFiles = JSON.parse(localStorage.getItem("vaultFiles") || "[]");
+
+    storedFiles.forEach((file, index) => {
+      const div = document.createElement('div');
+      div.className = "file-entry";
+
+      let preview = '';
+      if (file.type.startsWith("image/")) {
+        preview = `<img src="${file.data}" class="preview">`;
+      } else if (file.type.startsWith("text/")) {
+        try {
+          preview = `<div class="preview">${atob(file.data.split(',')[1])}</div>`;
+        } catch (e) {
+          preview = `<div class="preview">[Error previewing text]</div>`;
+        }
+      }
+
+      div.innerHTML = `
+        <strong>${file.name}</strong>
+        <div>
+          <button onclick="downloadFile(${index})">Download</button>
+          <button onclick="deleteFile(${index})">Delete</button>
+        </div>
+        ${preview}
+      `;
+      fileList.appendChild(div);
+    });
+  }
+
+  function deleteFile(index) {
+    const files = JSON.parse(localStorage.getItem("vaultFiles") || "[]");
+    files.splice(index, 1);
+    localStorage.setItem("vaultFiles", JSON.stringify(files));
+    renderFileList();
+  }
+
+  function downloadFile(index) {
+    const files = JSON.parse(localStorage.getItem("vaultFiles") || "[]");
+    const file = files[index];
+    const a = document.createElement('a');
+    a.href = file.data;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function startLiveFeed() {
+    const feed = document.getElementById('hacker-feed');
+    let index = 1;
+    setInterval(() => {
+      if (index < feedLines.length) {
+        feed.textContent += "\n" + feedLines[index];
+        feed.scrollTop = feed.scrollHeight;
+        index++;
+      }
+    }, 2000);
+  }
+
+  function loadFiles() {
+    renderFileList();
+  }
+
+  function saveVaultPassword() {
+    const label = document.getElementById('vault-label').value.trim();
+    const pass = document.getElementById('vault-password').value.trim();
+
+    if (!label || !pass) {
+      alert("Both label and password are required.");
+      return;
+    }
+
+    const stored = JSON.parse(localStorage.getItem("vaultPasswords") || "[]");
+    stored.push({ label, pass });
+    localStorage.setItem("vaultPasswords", JSON.stringify(stored));
+
+    document.getElementById('vault-label').value = '';
+    document.getElementById('vault-password').value = '';
+    renderPasswordVault();
+  }
+
+  function renderPasswordVault() {
+    const list = document.getElementById('password-list');
+    const stored = JSON.parse(localStorage.getItem("vaultPasswords") || "[]");
+    list.innerHTML = "";
+
+    stored.forEach((entry, index) => {
+      const div = document.createElement("div");
+      div.className = "file-entry";
+      div.innerHTML = `
+        <strong>${entry.label}</strong>
+        <div class="preview">${entry.pass}</div>
+        <button onclick="deleteVaultPassword(${index})">Delete</button>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function deleteVaultPassword(index) {
+    const stored = JSON.parse(localStorage.getItem("vaultPasswords") || "[]");
+    stored.splice(index, 1);
+    localStorage.setItem("vaultPasswords", JSON.stringify(stored));
+    renderPasswordVault();
+  }
+
+  function clearVaultPasswords() {
+    if (confirm("Delete all saved passwords?")) {
+      localStorage.removeItem("vaultPasswords");
+      renderPasswordVault();
+    }
+  }
+
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('pingTime').textContent = now.toLocaleTimeString();
+  }, 1000);
+
+  window.onload = () => {
+    if (localStorage.getItem("vaultAccess") === "granted") {
+      document.getElementById('signin-section').classList.add('hidden');
+      ['upload-section', 'files-section', 'live-section', 'monitor-section', 'password-vault-section'].forEach(id =>
+        document.getElementById(id).classList.remove('hidden')
+      );
+      loadFiles();
+      renderPasswordVault();
+      startLiveFeed();
+    }
+  };
+</script>
+
+</body>
+</html>
